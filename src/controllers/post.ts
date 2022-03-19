@@ -3,6 +3,8 @@ import { validationResult } from "express-validator";
 import { Post } from "../models/post";
 import { NewError } from "../util/NewError";
 import { Types } from "mongoose";
+import { User } from "../models/user";
+import mongoose from "mongoose";
 
 const defaultUser = new Types.ObjectId("6231b27089f80e5d02e2575c");
 
@@ -11,7 +13,6 @@ export const createPost: RequestHandler<
   any,
   { imageUrl: string; description: string }
 > = async (req, res, next) => {
-  console.log("!!!!!!!!!!!!!!!!!!!!from createpost");
   if (!req.file) {
     const error = new NewError("image is not provided", 422);
     next(error);
@@ -24,7 +25,13 @@ export const createPost: RequestHandler<
   console.log(description);
   const post = new Post({ description, imageUrl, creator: defaultUser });
   try {
+    // save the post
     await post.save();
+    // add the new post _id to the user document
+    const user = await User.findById(defaultUser);
+    user?.posts.push(post);
+    await user?.save();
+    // then return the response
     res.status(201).json({ message: "post created successfully", post });
   } catch (err) {
     console.log(err);
@@ -35,7 +42,7 @@ export const createPost: RequestHandler<
 
 export const getPosts: RequestHandler = async (req, res, next) => {
   try {
-    const posts = await Post.find().sort({ createdAt: "desc" });
+    const posts = await Post.find().sort({createdAt: "desc"});
     if (!posts) {
       res.status(204).json({message: "No posts found"});
     } else {

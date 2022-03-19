@@ -5,10 +5,10 @@ interface User {
   email: string;
   password: string;
   bio: string;
-  followers: Schema.Types.ObjectId[];
-  following: Schema.Types.ObjectId[];
+  followers: object[];
+  following: object[];
   profilePicture: string;
-  posts: Schema.Types.ObjectId[];
+  posts: object[];
 }
 
 const userSchema = new Schema({
@@ -16,6 +16,7 @@ const userSchema = new Schema({
   email: { type: String, required: true },
   password: { type: String, required: true },
   bio: { type: String  },
+  profilePicture: {type: String},
   following: [{type: Schema.Types.ObjectId}],
   followers: [{type: Schema.Types.ObjectId}],
   posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],

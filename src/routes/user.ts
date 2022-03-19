@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { body } from "express-validator";
 
-import { createUser } from "../controllers/user";
+import { createUser, getUser } from "../controllers/user";
 import { User } from "../models/user";
 
 export const userRoutes = Router();
@@ -10,7 +10,7 @@ userRoutes.post(
   "/create-user",
   [
     body("email")
-      .isEmail()
+      .isEmail().withMessage("Please enter a valid email")
       .custom((value, { req }) => {
         return User.findOne({ email: value }).then((userDoc) => {
           if (userDoc) {
@@ -24,3 +24,6 @@ userRoutes.post(
   ],
   createUser
 );
+
+
+userRoutes.get("/get-user/:id", getUser);

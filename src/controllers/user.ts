@@ -14,6 +14,8 @@ export const createUser: RequestHandler<
     const error = new NewError("Validation failed", 422, errors);
     throw error;
   }
+  const imageUrl = req.file?.path;
+  // add name and password validation(using express validator) and hash the password
   const { email, name, password } = req.body;
 
   const user = new User({
@@ -21,16 +23,42 @@ export const createUser: RequestHandler<
     email,
     password,
     bio: "",
+    profilePicture: imageUrl || "",
     followers: [],
     following: [],
     posts: [],
   });
   try {
     await user.save();
-    res.status(201).json({message: "user created successfully"})
+    res.status(201).json({ message: "User created successfully" });
   } catch (err) {
     console.log(err);
     const error = new NewError("Couldn't create user");
-    next(error)
+    next(error);
+  }
+};
+
+export const getUser: RequestHandler<{ id: string }> = async (
+  req,
+  res,
+  next
+) => {
+  if (!req.params.id) {
+    res.status(404).json({message: "User doesn't exist"})
+    next();
+  }
+  const id = req.params.id;
+
+  try {
+    // trying to return the posts when getting the user
+    const user = await User.findById(id).populate("posts");
+    if (!user) {
+      res.status(404).json({message: "User doesn't exist"})
+    } else {
+      res.status(200).json({user});
+    }
+  } catch(err) {
+    res.status(500).json({message: "Something went wrong"})
+    console.log(err);
   }
 };
