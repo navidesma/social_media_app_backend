@@ -6,4 +6,5 @@ export const postRoutes = Router();
 
 postRoutes.get("/get-posts", getPosts);
 
-postRoutes.post("/create-posts", createPost)
+postRoutes.post("/create-posts", createPost);
+

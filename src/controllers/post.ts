@@ -6,7 +6,8 @@ import { Types } from "mongoose";
 import { User } from "../models/user";
 import mongoose from "mongoose";
 
-const defaultUser = new Types.ObjectId("6231b27089f80e5d02e2575c");
+const defaultUser = new Types.ObjectId("62363c0b5d97b507588ce88e");
+const secondUser = new Types.ObjectId("62370bf83bf2f2a6d21fe833");
 
 export const createPost: RequestHandler<
   any,
@@ -23,12 +24,12 @@ export const createPost: RequestHandler<
   let description: string;
   description = req.body.description;
   console.log(description);
-  const post = new Post({ description, imageUrl, creator: defaultUser });
+  const post = new Post({ description, imageUrl, creator: secondUser });
   try {
     // save the post
     await post.save();
     // add the new post _id to the user document
-    const user = await User.findById(defaultUser);
+    const user = await User.findById(secondUser);
     user?.posts.push(post);
     await user?.save();
     // then return the response
@@ -42,7 +43,8 @@ export const createPost: RequestHandler<
 
 export const getPosts: RequestHandler = async (req, res, next) => {
   try {
-    const posts = await Post.find().sort({createdAt: "desc"});
+    const posts = await Post.find().populate("creator").sort({createdAt: "desc"});
+    // console.log(posts);
     if (!posts) {
       res.status(204).json({message: "No posts found"});
     } else {

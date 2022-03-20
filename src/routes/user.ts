@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { body } from "express-validator";
 
-import { createUser, getUser } from "../controllers/user";
+import { createUser, getUser, getFollowers, getFollowing  } from "../controllers/user";
 import { User } from "../models/user";
 
 export const userRoutes = Router();
@@ -27,3 +27,7 @@ userRoutes.post(
 
 
 userRoutes.get("/get-user/:id", getUser);
+
+userRoutes.get("/get-followers/:id", getFollowers);
+
+userRoutes.get("/get-following/:id", getFollowing);
