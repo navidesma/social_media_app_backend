@@ -8,6 +8,7 @@ import multer, { diskStorage } from "multer";
 import { postRoutes } from "./routes/post";
 import { userRoutes } from "./routes/user";
 import { NewError } from "./util/NewError";
+import { authRoutes } from "./routes/auth";
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use(cores());
 
 app.use("/post", postRoutes);
 app.use("/user", userRoutes);
+app.use("/auth", authRoutes);
 
 app.use("*", (req: Request, res: Response, next: NextFunction) => {
   const error = new NewError("invalid path", 400);

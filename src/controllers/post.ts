@@ -6,14 +6,13 @@ import { Types } from "mongoose";
 import { User } from "../models/user";
 import mongoose from "mongoose";
 
-const defaultUser = new Types.ObjectId("62363c0b5d97b507588ce88e");
-const secondUser = new Types.ObjectId("62370bf83bf2f2a6d21fe833");
 
 export const createPost: RequestHandler<
   any,
   any,
-  { imageUrl: string; description: string }
+  { imageUrl: string; description: string, userId: string }
 > = async (req, res, next) => {
+  console.log(req.body);
   if (!req.file) {
     const error = new NewError("image is not provided", 422);
     next(error);
@@ -24,12 +23,12 @@ export const createPost: RequestHandler<
   let description: string;
   description = req.body.description;
   console.log(description);
-  const post = new Post({ description, imageUrl, creator: secondUser });
+  const post = new Post({ description, imageUrl, creator: req.body.userId });
   try {
     // save the post
     await post.save();
     // add the new post _id to the user document
-    const user = await User.findById(secondUser);
+    const user = await User.findById(req.body.userId);
     user?.posts.push(post);
     await user?.save();
     // then return the response
