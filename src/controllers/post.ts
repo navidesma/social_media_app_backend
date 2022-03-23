@@ -2,15 +2,12 @@ import { RequestHandler } from "express";
 import { validationResult } from "express-validator";
 import { Post } from "../models/post";
 import { NewError } from "../util/NewError";
-import { Types } from "mongoose";
 import { User } from "../models/user";
-import mongoose from "mongoose";
-
 
 export const createPost: RequestHandler<
   any,
   any,
-  { imageUrl: string; description: string, userId: string }
+  { imageUrl: string; description: string; userId: string }
 > = async (req, res, next) => {
   console.log(req.body);
   if (!req.file) {
@@ -40,14 +37,29 @@ export const createPost: RequestHandler<
   }
 };
 
-export const getPosts: RequestHandler = async (req, res, next) => {
+export const getPosts: RequestHandler<any, any, { userId: string }> = async (
+  req,
+  res,
+  next
+) => {
+  let currentPage = 1;
+  if (req.get("currentPage")) {
+    currentPage = +req.get("currentPage")!;
+  }
+  const perPage = 2;
   try {
-    const posts = await Post.find().populate("creator").sort({createdAt: "desc"});
+    const user = await User.findById(req.body.userId);
+    const totalItems = await Post.find().countDocuments();
+    const posts = await Post.find({ creator: [req.body.userId, ...(user!.following)] })
+      .populate("creator")
+      .sort({ createdAt: "desc" })
+      .skip((+currentPage - 1) * perPage)
+      .limit(perPage);
     // console.log(posts);
     if (!posts) {
-      res.status(204).json({message: "No posts found"});
+      res.status(204).json({ message: "No posts found" });
     } else {
-      res.status(200).json({posts});
+      res.status(200).json({ posts, totalPages: totalItems / perPage });
     }
   } catch (err) {
     const error = new NewError("Can't fetch data");
