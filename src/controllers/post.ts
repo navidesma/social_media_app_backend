@@ -48,14 +48,15 @@ export const getPosts: RequestHandler<any, any, { userId: string }> = async (
   }
   const perPage = 2;
   try {
+    // get the user _ids of those who you follow
     const user = await User.findById(req.body.userId);
-    const totalItems = await Post.find().countDocuments();
+    // query the posts from you and those you follow and sort them by date and use pagination
+    const totalItems = await Post.find({ creator: [req.body.userId, ...(user!.following)] }).countDocuments();
     const posts = await Post.find({ creator: [req.body.userId, ...(user!.following)] })
       .populate("creator")
       .sort({ createdAt: "desc" })
       .skip((+currentPage - 1) * perPage)
       .limit(perPage);
-    // console.log(posts);
     if (!posts) {
       res.status(204).json({ message: "No posts found" });
     } else {

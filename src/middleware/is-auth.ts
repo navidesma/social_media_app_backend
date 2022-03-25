@@ -15,14 +15,14 @@ export const isAuth: RequestHandler = (
     try {
       decodedToken = jwt.verify(token, "jesusPashmak") as jwt.JwtPayload;
     } catch (err: Error | any) {
-      err.statsCode = 500;
-      throw err;
+      const error = new NewError("Something went wrong", 500);
+      next(error);
     }
   }
   if (!decodedToken) {
     const error = new NewError("Not Authenticated", 401);
-    throw error;
+    next(error);
   }
-  req.body.userId = decodedToken.userId;
+  req.body.userId = decodedToken!.userId;
   next();
 };

@@ -15,7 +15,7 @@ export const signup: RequestHandler<
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new NewError("Validation failed", 422, errors.array());
-    throw error;
+    next(error)
   }
   const imageUrl = req.file?.path || "";
   const { email, name, password } = req.body;

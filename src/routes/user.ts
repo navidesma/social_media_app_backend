@@ -1,8 +1,6 @@
 import { Router } from "express";
-import { body } from "express-validator";
 
-import { getUser, getFollowers, getFollowing  } from "../controllers/user";
-import { User } from "../models/user";
+import { getUser, getFollowers, getFollowing, getFollowingWithoutDetail, addToFollowing, removeFromFollowing  } from "../controllers/user";
 
 import {isAuth} from "../middleware/is-auth";
 
@@ -14,3 +12,9 @@ userRoutes.get("/get-user/:id", isAuth, getUser);
 userRoutes.get("/get-followers/:id", isAuth, getFollowers);
 
 userRoutes.get("/get-following/:id", isAuth, getFollowing);
+
+userRoutes.get("/get-following-no-detail/:id", isAuth, getFollowingWithoutDetail);
+
+userRoutes.put("/add-following", isAuth, addToFollowing);
+
+userRoutes.delete("/remove-following", isAuth, removeFromFollowing);
