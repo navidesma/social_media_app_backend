@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { getUser, getFollowers, getFollowing, getFollowingWithoutDetail, addToFollowing, removeFromFollowing  } from "../controllers/user";
+import { getUser, getFollowers, getFollowing, getFollowingWithoutDetail, addToFollowing, removeFromFollowing, searchUser  } from "../controllers/user";
 
 import {isAuth} from "../middleware/is-auth";
 
@@ -18,3 +18,5 @@ userRoutes.get("/get-following-no-detail/:id", isAuth, getFollowingWithoutDetail
 userRoutes.put("/add-following", isAuth, addToFollowing);
 
 userRoutes.delete("/remove-following", isAuth, removeFromFollowing);
+
+userRoutes.post("/search-users", isAuth, searchUser);

@@ -173,3 +173,17 @@ export const removeFromFollowing: RequestHandler<
     next(error);
   }
 };
+
+export const searchUser: RequestHandler<
+  any,
+  any,
+  { target: string }
+> = async (req, res, next) => {
+  console.log(req.body.target);
+  if (!req.body.target) {
+    const error = new NewError("invalid", 400);
+    next(error);
+  }
+  const users = await User.find({name:{'$regex' : (req.body.target).toString(), '$options' : 'i'}}).select(["-password"]);
+  res.status(200).json({users});
+};
