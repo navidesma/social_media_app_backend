@@ -179,7 +179,6 @@ export const searchUser: RequestHandler<
   any,
   { target: string }
 > = async (req, res, next) => {
-  console.log(req.body.target);
   if (!req.body.target) {
     const error = new NewError("invalid", 400);
     next(error);

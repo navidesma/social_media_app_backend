@@ -42,17 +42,21 @@ app.use(json());
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single("image"))
 
 app.use("/images", express.static(join(__dirname, "..", "images")));
+app.use(express.static(join(__dirname, "..", "client", "build")));
+// app.use(express.static(join(__dirname, "../client/build/index.html")));
 
 
 app.use(cores());
 
-app.use("/post", postRoutes);
-app.use("/user", userRoutes);
-app.use("/auth", authRoutes);
+app.use("/api/post", postRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use("*", (req: Request, res: Response, next: NextFunction) => {
-  const error = new NewError("invalid path", 400);
-  next(error)
+  // const error = new NewError("invalid path", 400);
+  // next(error)
+  res.sendFile(join(__dirname, "../client/build/index.html"))
+  next()
 })
 
 app.use((error: NewError, req: Request, res: Response, next: NextFunction) => {
@@ -70,4 +74,4 @@ const connectToDb = async () => {
   }
 };
 connectToDb();
-app.listen(8080, "127.0.0.1");
+app.listen(80, "185.208.79.227");
