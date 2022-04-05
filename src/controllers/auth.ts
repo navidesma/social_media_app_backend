@@ -1,5 +1,7 @@
 import { RequestHandler } from "express";
 import { validationResult } from "express-validator";
+import {unlink} from "fs";
+import { join } from "path";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -12,27 +14,30 @@ export const signup: RequestHandler<
   any,
   { email: string; name: string; password: string }
 > = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new NewError("Validation failed", 422, errors.array());
-    next(error)
-  }
-  const imageUrl = req.file?.path || "";
-  const { email, name, password } = req.body;
   try {
-    const hashedPw = await bcrypt.hash(password, 12);
-    const user = new User({
-      name,
-      email,
-      password: hashedPw,
-      bio: "",
-      profilePicture: imageUrl,
-      followers: [],
-      following: [],
-      posts: [],
-    });
-    await user.save();
-    res.status(201).json({ message: "User created successfully" });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      if (req.file?.path) {
+        unlink(join(__dirname, "..", "..", req.file?.path), (err) => {if (err) {console.log(err)}else {console.log("file deleted successfully due to validation failure")}})
+      }
+      const error = new NewError("Validation failed", 422, errors.array());
+      throw error;
+    }
+    const imageUrl = req.file?.path || "";
+    const { email, name, password } = req.body;
+      const hashedPw = await bcrypt.hash(password, 12);
+      const user = new User({
+        name,
+        email,
+        password: hashedPw,
+        bio: "",
+        profilePicture: imageUrl,
+        followers: [],
+        following: [],
+        posts: [],
+      });
+      await user.save();
+      res.status(201).json({ message: "User created successfully" });
   } catch (err) {
     console.log(err);
     const error = new NewError("User creation failed", 422);
