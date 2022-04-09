@@ -17,7 +17,7 @@ const fileStorage = diskStorage({
     cb(null, "images");
   },
   filename: (req, file, cb) => {
-    cb(null, new Date().toISOString() + "_" + file.originalname);
+    cb(null, new Date().toISOString().replace(/:/g, '-') + "_" + file.originalname);
   },
 });
 
@@ -39,7 +39,7 @@ const fileFilter = (
 
 app.use(json());
 
-app.use(multer({storage: fileStorage, fileFilter: fileFilter, dest: "./images/"}).single("image"))
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single("image"))
 
 app.use("/images", express.static(join(__dirname, "..", "images")));
 app.use(express.static(join(__dirname, "..", "client", "build")));

@@ -1,7 +1,4 @@
 import { RequestHandler } from "express";
-import {unlink} from "fs";
-import { join } from "path";
-
 import { Post } from "../models/post";
 import { NewError } from "../util/NewError";
 import { User } from "../models/user";
@@ -19,10 +16,8 @@ export const createPost: RequestHandler<
     }
     
     const imageUrl = req.file?.path;
-    console.log("!!!!imageUrl=>", imageUrl);
     let description: string;
-    description = req.body.description;
-    console.log(description);
+    description = req.body.description || " ";
     const post = new Post({ description, imageUrl, creator: req.body.userId });
       // save the post
       await post.save();
@@ -30,7 +25,6 @@ export const createPost: RequestHandler<
       const user = await User.findById(req.body.userId);
       user?.posts.push(post);
       await user?.save();
-      // then return the response
       res.status(201).json({ message: "post created successfully", post });
   }
   
@@ -48,7 +42,9 @@ export const getPosts: RequestHandler<any, any, { userId: string }> = async (
 ) => {
   let currentPage = 1;
   if (req.get("currentPage")) {
-    currentPage = +req.get("currentPage")!;
+    if (req.get("currentPage") !== "1") {
+      currentPage = +req.get("currentPage")!;
+    }
   }
   const perPage = 2;
   try {
@@ -64,7 +60,7 @@ export const getPosts: RequestHandler<any, any, { userId: string }> = async (
     if (!posts) {
       res.status(204).json({ message: "No posts found" });
     } else {
-      res.status(200).json({ posts, totalPages: totalItems / perPage });
+      res.status(200).json({ posts, totalPages: Math.round(totalItems / perPage) });
     }
   } catch (err) {
     const error = new NewError("Can't fetch data");

@@ -59,16 +59,12 @@ export const getFollowers: RequestHandler<{ id: string }> = async (
   }
 };
 
-export const getFollowing: RequestHandler<{ id: string }> = async (
+export const getFollowing: RequestHandler<any, any, { userId: string }> = async (
   req,
   res,
   next
 ) => {
-  if (!req.params.id) {
-    res.status(404).json({ message: "User doesn't exist" });
-    next();
-  }
-  const id = req.params.id;
+  const id = req.body.userId;
 
   try {
     // return the user with its following populated
@@ -86,16 +82,12 @@ export const getFollowing: RequestHandler<{ id: string }> = async (
   }
 };
 
-export const getFollowingWithoutDetail: RequestHandler<{ id: string }> = async (
+export const getFollowingWithoutDetail: RequestHandler<any, any, { userId: string }> = async (
   req,
   res,
   next
 ) => {
-  if (!req.params.id) {
-    res.status(404).json({ message: "User doesn't exist" });
-    next();
-  }
-  const id = req.params.id;
+  const id = req.body.userId;
 
   try {
     // return the user with its following populated
@@ -106,8 +98,10 @@ export const getFollowingWithoutDetail: RequestHandler<{ id: string }> = async (
       res.status(200).json({ user });
     }
   } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
-    console.log(err);
+    // res.status(500).json({ message: "Something went wrong" });
+    // console.log(err);
+    const error = new NewError("Something went wrong");
+    next(error);
   }
 };
 
