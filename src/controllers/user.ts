@@ -121,13 +121,15 @@ export const addToFollowing: RequestHandler<
       (userId) => userId.toString() == target
     );
     if (doesAlreadyExist) {
-      // res
-      //   .status(422)
-      //   .json({ message: "User already exist in followers, bad request" });
       throw new Error("something went wrong");
     }
     user!.following.push(new mongoose.Types.ObjectId(target));
     await user!.save();
+
+    const targetUser = await User.findById(target);
+    targetUser!.followers.push(new mongoose.Types.ObjectId(userId));
+    await targetUser!.save();
+
     res.status(200).json({ message: "User added to following successfully" });
   } catch (err) {
     const error = new NewError("Something went wrong", 500);
@@ -145,20 +147,30 @@ export const removeFromFollowing: RequestHandler<
     const error = new NewError("Target user is not specified!", 400);
     next(error);
   }
-  const { userId, target } = req.body;
+  const { userId: mainUserId, target } = req.body;
   try {
-    const user = await User.findById(userId);
+    // remove the target user from main user followings
+    const user = await User.findById(mainUserId);
     const targetIndex = user?.following.findIndex(
-      (userId) => userId.toString() == target
+      (id) => id.toString() == target
     );
     if (targetIndex === -1) {
-      throw new Error("something went wrong")
-      // res.status(422).json({
-      //   message: "User doesn't exist in followers to be removed, bad request",
-      // });
+      throw new Error("User doesn't exist in followers to be removed, bad request")
     }
     user?.following.splice(targetIndex as number, 1);
     await user!.save();
+
+    // remove the main user from target user followers
+    const targetUser = await User.findById(target);
+    const mainUserIndex = targetUser?.followers.findIndex(
+      (id) => id.toString() == mainUserId
+    );
+    if (mainUserIndex === -1) {
+      throw new Error("User doesn't exist in followers to be removed, bad request")
+    }
+    targetUser?.followers.splice(mainUserIndex as number, 1);
+    await targetUser!.save();
+
     res
       .status(200)
       .json({ message: "Removed user from following successfully" });
