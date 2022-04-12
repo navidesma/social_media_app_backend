@@ -10,13 +10,13 @@ export const getUser: RequestHandler<{ id: string }> = async (
   res,
   next
 ) => {
-  if (!req.params.id) {
-    res.status(404).json({ message: "User doesn't exist" });
-    next();
-  }
-  const id = req.params.id;
-
   try {
+    if (!req.params.id) {
+      const error = new NewError("User doesn't exist", 404);
+      throw error;
+    }
+    const id = req.params.id;
+
     // trying to return the posts when getting the user
     const user = await User.findById(id)
       .select(["-password"])
@@ -27,8 +27,7 @@ export const getUser: RequestHandler<{ id: string }> = async (
       res.status(200).json({ user });
     }
   } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
-    console.log(err);
+    next(err);
   }
 };
 
@@ -37,13 +36,13 @@ export const getFollowers: RequestHandler<{ id: string }> = async (
   res,
   next
 ) => {
-  if (!req.params.id) {
-    res.status(404).json({ message: "User doesn't exist" });
-    next();
-  }
-  const id = req.params.id;
-
   try {
+    if (!req.params.id) {
+      const error = new NewError("User doesn't exist", 404);
+      throw error;
+    }
+    const id = req.params.id;
+
     // return the user with its followers populated
     const user = await User.findById(id)
       .select(["-password"])
@@ -54,16 +53,15 @@ export const getFollowers: RequestHandler<{ id: string }> = async (
       res.status(200).json({ user });
     }
   } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
-    console.log(err);
+    next(err);
   }
 };
 
-export const getFollowing: RequestHandler<any, any, { userId: string }> = async (
-  req,
-  res,
-  next
-) => {
+export const getFollowing: RequestHandler<
+  any,
+  any,
+  { userId: string }
+> = async (req, res, next) => {
   const id = req.body.userId;
 
   try {
@@ -72,36 +70,34 @@ export const getFollowing: RequestHandler<any, any, { userId: string }> = async 
       .select(["-password"])
       .populate("following");
     if (!user) {
-      res.status(404).json({ message: "User doesn't exist" });
+      const error = new NewError("User doesn't exist", 404);
+      throw error;
     } else {
       res.status(200).json({ user });
     }
   } catch (err) {
-    res.status(500).json({ message: "Something went wrong" });
-    console.log(err);
+    next(err);
   }
 };
 
-export const getFollowingWithoutDetail: RequestHandler<any, any, { userId: string }> = async (
-  req,
-  res,
-  next
-) => {
+export const getFollowingWithoutDetail: RequestHandler<
+  any,
+  any,
+  { userId: string }
+> = async (req, res, next) => {
   const id = req.body.userId;
 
   try {
     // return the user with its following populated
     const user = await User.findById(id).select(["-password"]);
     if (!user) {
-      res.status(404).json({ message: "User doesn't exist" });
+      const error = new NewError("User doesn't exist", 404);
+      throw error;
     } else {
       res.status(200).json({ user });
     }
   } catch (err) {
-    // res.status(500).json({ message: "Something went wrong" });
-    // console.log(err);
-    const error = new NewError("Something went wrong");
-    next(error);
+    next(err);
   }
 };
 
@@ -110,12 +106,12 @@ export const addToFollowing: RequestHandler<
   any,
   { userId: string; target: string }
 > = async (req, res, next) => {
-  if (!req.body.target) {
-    const error = new NewError("Target user is not specified!", 400);
-    next(error);
-  }
-  const { userId, target } = req.body;
   try {
+    if (!req.body.target) {
+      const error = new NewError("Target user is not specified!", 400);
+      throw error;
+    }
+    const { userId, target } = req.body;
     const user = await User.findById(userId);
     const doesAlreadyExist = user?.following.find(
       (userId) => userId.toString() == target
@@ -132,8 +128,7 @@ export const addToFollowing: RequestHandler<
 
     res.status(200).json({ message: "User added to following successfully" });
   } catch (err) {
-    const error = new NewError("Something went wrong", 500);
-    next(error);
+    next(err);
   }
 };
 
@@ -142,20 +137,22 @@ export const removeFromFollowing: RequestHandler<
   any,
   { userId: string; target: string }
 > = async (req, res, next) => {
-  console.log("!!!", req.body)
-  if (!req.body.target) {
-    const error = new NewError("Target user is not specified!", 400);
-    next(error);
-  }
-  const { userId: mainUserId, target } = req.body;
   try {
+    if (!req.body.target) {
+      const error = new NewError("Target user is not specified!", 400);
+      throw error;
+    }
+    const { userId: mainUserId, target } = req.body;
     // remove the target user from main user followings
     const user = await User.findById(mainUserId);
     const targetIndex = user?.following.findIndex(
       (id) => id.toString() == target
     );
     if (targetIndex === -1) {
-      throw new Error("User doesn't exist in followers to be removed, bad request")
+      throw new NewError(
+        "User doesn't exist in followers to be removed, bad request",
+        400
+      );
     }
     user?.following.splice(targetIndex as number, 1);
     await user!.save();
@@ -166,7 +163,10 @@ export const removeFromFollowing: RequestHandler<
       (id) => id.toString() == mainUserId
     );
     if (mainUserIndex === -1) {
-      throw new Error("User doesn't exist in followers to be removed, bad request")
+      throw new NewError(
+        "User doesn't exist in followers to be removed, bad request",
+        400
+      );
     }
     targetUser?.followers.splice(mainUserIndex as number, 1);
     await targetUser!.save();
@@ -175,20 +175,25 @@ export const removeFromFollowing: RequestHandler<
       .status(200)
       .json({ message: "Removed user from following successfully" });
   } catch (err) {
-    const error = new NewError("Something went wrong", 500);
-    next(error);
+    next(err);
   }
 };
 
-export const searchUser: RequestHandler<
-  any,
-  any,
-  { target: string }
-> = async (req, res, next) => {
-  if (!req.body.target) {
-    const error = new NewError("invalid", 400);
-    next(error);
+export const searchUser: RequestHandler<any, any, { target: string }> = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    if (!req.body.target) {
+      const error = new NewError("invalid request", 400);
+      throw error;
+    }
+    const users = await User.find({
+      name: { $regex: req.body.target.toString(), $options: "i" },
+    }).select(["-password"]);
+    res.status(200).json({ users });
+  } catch (err) {
+    next(err);
   }
-  const users = await User.find({name:{'$regex' : (req.body.target).toString(), '$options' : 'i'}}).select(["-password"]);
-  res.status(200).json({users});
 };

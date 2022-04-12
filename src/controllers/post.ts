@@ -29,9 +29,7 @@ export const createPost: RequestHandler<
   }
   
   catch (err) {
-    console.log(err);
-    const error = new NewError("post creation failed", 422);
-    next(error);
+    next(err);
   }
 };
 
@@ -63,7 +61,6 @@ export const getPosts: RequestHandler<any, any, { userId: string }> = async (
       res.status(200).json({ posts, totalPages: Math.round(totalItems / perPage) });
     }
   } catch (err) {
-    const error = new NewError("Can't fetch data");
-    next(error);
+    next(err);
   }
 };

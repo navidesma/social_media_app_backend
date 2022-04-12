@@ -39,9 +39,7 @@ export const signup: RequestHandler<
       await user.save();
       res.status(201).json({ message: "User created successfully" });
   } catch (err) {
-    console.log(err);
-    const error = new NewError("User creation failed", 422);
-    next(error);
+    next(err);
   }
 };
 

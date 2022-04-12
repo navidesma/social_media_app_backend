@@ -14,8 +14,7 @@ export const isAuth: RequestHandler = (req: any, res, next) => {
       throw new Error("No Authorization key in header was provided");
     }
     if (!decodedToken) {
-      // const error = new NewError("Not Authenticated", 401);
-      throw new Error("Not Authenticated");
+      throw new NewError("Not Authenticated", 401);
     }
     req.body.userId = decodedToken!.userId;
     next();
