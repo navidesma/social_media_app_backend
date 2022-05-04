@@ -2,7 +2,8 @@ node_modules
 
 dist
 
-images
+images/*
+!images/default.jpg
 
 *.zip
 client

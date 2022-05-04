@@ -51,10 +51,11 @@ app.use("/post", postRoutes);
 app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 
-app.use("*", (req: Request, res: Response, next: NextFunction) => {
-  res.sendFile(join(__dirname, "../client/build/index.html"))
-  next()
-})
+// build the react app and place it in the represented directory
+// app.use("*", (req: Request, res: Response, next: NextFunction) => {
+//   res.sendFile(join(__dirname, "../client/build/index.html"))
+//   next()
+// })
 
 app.use((error: NewError, req: Request, res: Response, next: NextFunction) => {
   const { statusCode, message } = error;
