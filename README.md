@@ -5,6 +5,9 @@ My email:
 <br>
 g930fdgold@gmail.com
 <br>
+Requirements:
+MongoDB should be installed on your machine
+<br>
 Frontend repo:
 <br>
 https://github.com/navidesma/social_media_app_frontend.git
