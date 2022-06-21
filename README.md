@@ -1,7 +1,6 @@
 <h2>This repo is a express project and acts as a rest api for a react client</h2>
-It is not the best express rest api that you have ever seen but i have tried my best for now, it will have bugs and i will appreciate your suggestions and comments
 <br>
-My email:
+I appreciate your suggestions and comments:
 <br>
 g930fdgold@gmail.com
 <br>
